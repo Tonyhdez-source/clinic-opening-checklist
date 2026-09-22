@@ -1,0 +1,562 @@
+<title>Clinic Opening Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --ground:#F4F7F8; --surface:#FFFFFF; --sunk:#E9EFF1; --line:#D5DEE2;
+  --ink:#13212A; --ink-2:#4A5B66; --ink-3:#7A8A94;
+  --accent:#0F6E86; --accent-ink:#FFFFFF; --accent-soft:#DCEEF2;
+  --ok:#2F7D4F; --ok-soft:#DDEFE3; --warn:#A8690F; --warn-soft:#F7EAD2; --bad:#B4382E; --bad-soft:#F6DEDB;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0D1418; --surface:#142026; --sunk:#1B2A31; --line:#2A3B43;
+    --ink:#E3ECEF; --ink-2:#A7B7BF; --ink-3:#74868F;
+    --accent:#5BC0D5; --accent-ink:#06222A; --accent-soft:#173842;
+    --ok:#6BC58E; --ok-soft:#173526; --warn:#E3AA52; --warn-soft:#3A2C14; --bad:#EE7F73; --bad-soft:#3D1D1A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0D1418; --surface:#142026; --sunk:#1B2A31; --line:#2A3B43;
+  --ink:#E3ECEF; --ink-2:#A7B7BF; --ink-3:#74868F;
+  --accent:#5BC0D5; --accent-ink:#06222A; --accent-soft:#173842;
+  --ok:#6BC58E; --ok-soft:#173526; --warn:#E3AA52; --warn-soft:#3A2C14; --bad:#EE7F73; --bad-soft:#3D1D1A;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--body);padding-inline:16px;padding-block:20px 64px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* header */
+.top{display:grid;grid-template-columns:1fr auto;gap:16px 24px;align-items:end}
+.top h1{font-size:clamp(26px,4.2vw,38px);font-weight:800;letter-spacing:-.01em;line-height:1.05}
+.top p{margin:6px 0 0;color:var(--ink-2);max-width:60ch}
+.clinicbar{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr);gap:16px;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+select,input[type=text],input[type=date],textarea{background:var(--ground);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0;width:100%}
+textarea{resize:vertical;min-height:56px}
+.count{display:flex;align-items:baseline;gap:10px}
+.count b{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.count span{color:var(--ink-2);font-size:13px}
+.meter{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.statline{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:6px;font-variant-numeric:tabular-nums}
+.statline .od{color:var(--bad);font-weight:600}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:4px 9px;font-size:13px}
+.linkish{background:none;border:0;padding:0;color:var(--accent);font-weight:500}
+
+.newclinic{background:var(--surface);border:1px dashed var(--accent);border-radius:10px;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.newclinic .field{flex:1 1 200px}
+.newclinic p{flex-basis:100%;margin:0;color:var(--ink-2)}
+.banner{border-radius:8px;padding:10px 14px;background:var(--warn-soft);color:var(--ink);font-size:14px}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 12px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.toolbar select{width:auto;font-size:13px;padding:6px 8px}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump a{font-size:12.5px;text-decoration:none;color:var(--ink-2);border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.jump a b{color:var(--ink);font-weight:600}
+.jump a.full{border-color:var(--ok);color:var(--ok)}
+
+/* sections */
+section.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sechead{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sechead h2{font-size:18px;font-weight:700;flex:1;min-width:0}
+.sechead .who{font-size:12.5px;color:var(--ink-3);font-weight:400;font-family:var(--body);display:block;margin-top:2px}
+.sechead .frac{font:500 13px var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sechead .meter{width:90px;flex:none}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:28px minmax(0,1fr) 150px 140px auto;gap:6px 12px;padding:11px 16px;border-top:1px solid var(--line);align-items:start}
+.row:first-child{border-top:0}
+.row.is-done .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.row.is-na{opacity:.55}
+.row.is-na .t{text-decoration:line-through}
+.chk{appearance:none;width:20px;height:20px;border:2px solid var(--ink-3);border-radius:5px;margin:2px 0 0;display:grid;place-items:center;background:var(--surface)}
+.chk:checked{background:var(--ok);border-color:var(--ok)}
+.chk:checked::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:translate(0,-1px) rotate(45deg)}
+.chk:disabled{opacity:.4}
+.t{font-weight:500}
+.d{color:var(--ink-2);font-size:13.5px;margin-top:2px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.chip{font:500 11.5px/1 var(--mono);padding:4px 7px;border-radius:4px;background:var(--sunk);color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip.od{background:var(--bad-soft);color:var(--bad)}
+.chip.soon{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.custom{background:var(--accent-soft);color:var(--accent)}
+.row input[type=text],.row input[type=date]{font-size:13px;padding:5px 7px}
+.acts{display:flex;gap:4px;justify-content:flex-end}
+.ic{border:1px solid transparent;background:none;border-radius:5px;padding:4px 7px;font-size:12px;color:var(--ink-3);font-weight:500;white-space:nowrap}
+.ic:hover{border-color:var(--line);color:var(--ink)}
+.ic[aria-pressed=true]{color:var(--accent);border-color:var(--accent)}
+.notebox{grid-column:2 / -1}
+.addrow{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--ground)}
+.addrow input{flex:1 1 220px;width:auto}
+.addrow input.off{flex:0 0 90px}
+.confirm{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--bad)}
+.empty{padding:16px;color:var(--ink-3);font-size:14px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--ink-3);font-size:13px}
+.lbl-m{display:none}
+
+@media (max-width:760px){
+  .top{grid-template-columns:1fr}
+  .clinicbar{grid-template-columns:1fr}
+  .row{grid-template-columns:28px minmax(0,1fr);}
+  .row .own,.row .due,.row .acts{grid-column:2}
+  .row .acts{justify-content:flex-start}
+  .lbl-m{display:block;font:500 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+  .sechead .meter{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Meadows Eye · New location launch</div>
+      <h1>Clinic Opening Checklist</h1>
+      <p>Everything that has to happen between signing a lease and seeing the first patient. Timing is counted back from the target open date; set owners and dates per clinic, and the whole team sees updates live.</p>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <div id="clinicbar" class="clinicbar" hidden>
+    <div class="field">
+      <label for="clinicSel">Clinic</label>
+      <select id="clinicSel"></select>
+    </div>
+    <div class="field">
+      <label for="openDate">Target open date</label>
+      <input type="date" id="openDate">
+    </div>
+    <div>
+      <div class="count"><b id="cdNum">—</b><span id="cdLbl">set an open date</span></div>
+      <div class="meter" style="margin-top:8px"><i id="allMeter"></i></div>
+      <div class="statline"><span id="stDone"></span><span id="stOd" class="od"></span><span id="stSoon"></span></div>
+    </div>
+  </div>
+
+  <form id="newClinic" class="newclinic" hidden>
+    <p id="newClinicMsg"><strong>Start a checklist for a new location.</strong> Each clinic gets its own copy of the template below.</p>
+    <div class="field"><label for="ncName">Clinic name</label><input type="text" id="ncName" placeholder="e.g. Summerlin" required></div>
+    <div class="field"><label for="ncDate">Target open date</label><input type="date" id="ncDate" required></div>
+    <button class="btn primary" type="submit">Create checklist</button>
+    <button class="btn" type="button" id="ncCancel" hidden>Cancel</button>
+  </form>
+
+  <div class="toolbar" id="toolbar">
+    <div class="seg" role="group" aria-label="Show">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="open" aria-pressed="false">Open</button>
+      <button type="button" data-f="od" aria-pressed="false">Overdue</button>
+      <button type="button" data-f="done" aria-pressed="false">Done</button>
+    </div>
+    <select id="ownerFilter" aria-label="Filter by owner"><option value="">Everyone</option></select>
+    <button class="btn small" type="button" id="addClinicBtn">+ New clinic</button>
+  </div>
+  <nav class="jump" id="jump" aria-label="Sections"></nav>
+
+  <div id="sections" style="display:flex;flex-direction:column;gap:16px"></div>
+
+  <div class="foot">
+    <span id="saveState">Changes save automatically for everyone with access.</span>
+    <span id="delWrap"><button class="linkish" type="button" id="delClinic" style="color:var(--bad)" hidden>Delete this clinic's checklist</button></span>
+  </div>
+</div>
+
+<script>
+const SECTIONS = [
+ {id:"site", name:"Lease, buildout & site", who:"Facilities · Landlord · GC", tasks:[
+  ["lease","Lease executed & COI on file","Landlord certificate of insurance requirements met; TI allowance and landlord work letter confirmed.",180],
+  ["plan","Space plan approved","Exam lane count, pre-test/diagnostics room, imaging, check-in/out, optical (if any), staff areas. Lanes sized for 20 ft acuity or a mirrored chart.",170],
+  ["permits","Building permits pulled","City/county permits for TI; contractor license and schedule confirmed.",150],
+  ["power","Dedicated circuits for equipment","Confirm outlet count and dedicated circuits for OCT, fields, lasers, fridges, network rack.",120],
+  ["lighting","Dimmable exam-room lighting","Exam and diagnostic rooms dim fully; switches reachable from the chair side.",120],
+  ["sinks","Hand sinks & plumbing in clinical rooms","Sink in each exam room; eyewash station where chemicals are used.",120],
+  ["ada","ADA review","Accessible entrance, restrooms, counter height, exam lane with wheelchair access, parking.",110],
+  ["lowvolt","Low-voltage cabling complete","Data drops per room, AP locations, camera locations, rack/closet ventilation.",75],
+  ["hvac","HVAC balanced & PM scheduled","Server/IT closet cooling; filters and preventive-maintenance schedule set.",45],
+  ["coo","Final inspections & certificate of occupancy","Building, fire, and health (if required) inspections passed; C of O posted.",30],
+  ["signage","Exterior & suite signage installed","Sign permit, monument/pylon panels, suite door, wayfinding.",21],
+  ["access","Keys, fobs & alarm codes issued","Access control programmed; alarm monitoring active; key log started.",14],
+  ["punch","Punch list closed","Walk with GC; paint, ceiling tiles, doors, hardware, cleanup.",7],
+ ]},
+ {id:"comp", name:"Licensing, compliance & payers", who:"Admin · Billing · Compliance", tasks:[
+  ["biz","Local business license for the address","City/county business license issued or amended for the new location.",90],
+  ["medicare","Medicare practice location added","Add the location in PECOS (CMS-855B, and 855I/855R updates for providers who will see patients there).",90],
+  ["medicaid","Nevada Medicaid location update","Add the service location and affected providers.",90],
+  ["payers","Commercial payer & CAQH updates","Notify each contracted payer; update CAQH profiles and directory listings.",75],
+  ["dea","DEA registration (if storing controlled substances)","DEA registrations are per location; skip if none stored or dispensed on site.",75],
+  ["clia","CLIA certificate (if performing waived tests)","Mark N/A if no lab testing at this site.",60],
+  ["insurance","Property, liability & malpractice updated","Add the address to the property/GL policy; notify malpractice and workers' comp carriers.",45],
+  ["waste","Sharps & biohazard waste vendor","Pickup schedule and containers set up.",30],
+  ["posters","Required postings up","Labor law, OSHA, HIPAA Notice of Privacy Practices, nondiscrimination notice, license displays.",14],
+  ["safety","Fire extinguishers, exit lights & first aid","Extinguishers tagged, emergency lighting tested, first aid kit, evacuation map posted.",10],
+  ["aed","AED / emergency kit in place","Placement known to all staff; pads and meds in date.",10],
+ ]},
+ {id:"it", name:"IT, network & phones", who:"Facilities / IT · ISP · EHR vendor", tasks:[
+  ["isp","Internet circuit ordered","Lead times are often 30–90 days. Order primary fiber/cable plus LTE/5G failover.",100],
+  ["rack","Firewall, switches & Wi-Fi installed","Separate VLANs for clinical, staff, guest Wi-Fi, and card terminals.",40],
+  ["phones","Phone numbers & call routing","Port or assign numbers; auto-attendant, hunt groups, voicemail, fax line/e-fax.",35],
+  ["ehr","EHR / PM location built","Location, rooms, resources, fee schedule, and scheduling templates configured.",30],
+  ["ws","Workstations, printers & scanners deployed","Imaged, joined, labelled; label and insurance-card scanners tested.",21],
+  ["dicom","Diagnostic devices connected to EHR/PACS","Modality worklist and image export tested for OCT, fields, fundus camera, biometer.",14],
+  ["pci","Card terminals registered","Terminals on the segmented network; added to the PCI asset inventory.",14],
+  ["cams","Security cameras & remote access","Cameras recording; retention checked; remote viewing for managers.",14],
+  ["ups","UPS on rack and critical devices","Battery test done.",10],
+ ]},
+ {id:"equip", name:"Clinical equipment", who:"Facilities · Equipment vendors · Clinical lead", tasks:[
+  ["eqlist","Equipment list & budget approved","Per-lane and diagnostics list signed off; order dates set against vendor lead times.",120],
+  ["lanes","Exam lanes ordered","Chair & stand, slit lamp, phoropter, acuity chart/projector, tonometer, indirect ophthalmoscope, lenses.",100],
+  ["diag","Diagnostic devices ordered","OCT, visual field analyzer, fundus camera, autorefractor/keratometer, biometer, topographer as needed.",100],
+  ["delivery","Deliveries scheduled after construction dust","Coordinate so sensitive optics aren't installed before final clean.",30],
+  ["install","Installed, calibrated & checked out","Vendor install with calibration records kept on file.",14],
+  ["training","Vendor training for techs","Sign-in sheet for each device.",10],
+  ["service","Service contracts & warranty info filed","Contact numbers posted in the tech room.",10],
+  ["tags","Asset-tagged & entered in inventory","Serial numbers, install dates, and location recorded.",7],
+  ["fridge","Medication fridge with temperature log","Temperature monitor installed and log started before stocking.",7],
+  ["disinfect","Disinfection supplies & sterilization","Tonometer tip / lens disinfection process; autoclave if procedures are done here.",7],
+ ]},
+ {id:"fac", name:"Furniture, supplies & services", who:"Facilities · Purchasing", tasks:[
+  ["furn","Furniture ordered","Waiting room, front desk, staff chairs, break room. Check lead times.",75],
+  ["janitorial","Janitorial contract started","Includes a post-construction deep clean before equipment arrives.",30],
+  ["vendors","Recurring vendors set up","Trash/recycling, pest control, water, shredding.",30],
+  ["mail","Mail & package delivery","USPS delivery confirmed; address added to vendor ship-to lists.",21],
+  ["supplies","Opening supply order received","Office, clinical, drops, and patient-education materials; par levels set.",10],
+  ["forms","Forms & signage printed","Intake forms, financial policy, hours sign, restroom signs.",10],
+  ["break","Break room stocked","Fridge, microwave, coffee, paper goods.",5],
+ ]},
+ {id:"people", name:"Staffing & operations", who:"Clinic manager · HR", tasks:[
+  ["staffplan","Staffing plan & schedule","Front desk, techs, providers; float coverage for opening weeks.",75],
+  ["hire","New hires onboarded","Background checks, I-9, payroll setup, badges.",30],
+  ["sched","Provider schedules open for booking","Templates live in the EHR so the front desk can book the first weeks.",45],
+  ["train","Staff trained on site workflows","Check-in/out, patient flow, device use, opening/closing, emergency procedures.",7],
+  ["emerg","Emergency & closing procedures posted","Who to call for power, water, HVAC, IT, and alarm issues.",7],
+ ]},
+ {id:"comms", name:"Patient communication", who:"Marketing · Front desk", tasks:[
+  ["gbp","Google Business Profile created","Hours, phone, photos; verify ownership early (it can take weeks).",45],
+  ["web","Website location page live","Address, map, hours, providers, insurance accepted.",21],
+  ["notify","Patients & referral offices notified","Email/text to nearby patients; letters to referring doctors.",14],
+  ["greeting","Phone greeting recorded","Includes address and hours.",7],
+ ]},
+ {id:"golive", name:"Go-live week", who:"Everyone", tasks:[
+  ["walk","Final walkthrough","Every room, every light, every outlet; restock and fix list.",3],
+  ["mock","Mock patient day","Run test patients start to finish: check-in, pre-test, exam, imaging, checkout, payment.",2],
+  ["testall","Test phones, printers & card terminals","Inbound/outbound calls, fax, every printer, a live card transaction.",1],
+  ["day1","Opening day support on site","IT and facilities on site for day one; escalation contacts at the front desk.",0],
+  ["huddle","End-of-week huddle","Collect issues from staff and providers.",-5],
+  ["post30","30-day post-opening review","Close remaining punch items; adjust par levels, schedules, and staffing.",-30],
+ ]},
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DAY = 864e5;
+const parseD = s => { if(!s) return null; const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const fmtShort = d => d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const today = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+const tLabel = o => o > 0 ? `T-${o}` : o === 0 ? "Open day" : `+${-o} days`;
+const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null} }, set(k,v){ try{localStorage.setItem(k,v)}catch(e){} } };
+
+let db = null, readOnly = false;
+let clinics = [], clinicId = store.get("clinicId") || null, checks = {}, unsubChecks = null;
+let filter = "all", ownerF = "";
+let structSig = null;
+
+function clinic(){ return clinics.find(c => c.id === clinicId) || null; }
+function allTasks(){
+  const out = [];
+  for (const s of SECTIONS){
+    for (const [id,title,detail,off] of s.tasks) out.push({id, sec:s.id, title, detail, off, custom:false});
+  }
+  for (const [id,c] of Object.entries(checks)) if (c.custom) out.push({id, sec:c.section, title:c.title, detail:c.detail||"", off:Number(c.off)||0, custom:true});
+  return out;
+}
+function effDue(t){
+  const c = checks[t.id] || {};
+  if (c.due) return parseD(c.due);
+  const cl = clinic(); const od = cl && parseD(cl.openDate);
+  return od ? new Date(od.getTime() - t.off*DAY) : null;
+}
+function statusOf(t){
+  const c = checks[t.id] || {};
+  if (c.na) return "na";
+  if (c.done) return "done";
+  const d = effDue(t); if (!d) return "open";
+  const diff = Math.round((d - today())/DAY);
+  if (diff < 0) return "od";
+  if (diff <= 7) return "soon";
+  return "open";
+}
+function visible(t){
+  const st = statusOf(t), c = checks[t.id] || {};
+  if (ownerF && (c.owner||"").trim().toLowerCase() !== ownerF) return false;
+  if (filter === "open") return st !== "done" && st !== "na";
+  if (filter === "od") return st === "od";
+  if (filter === "done") return st === "done";
+  return true;
+}
+
+function rowHTML(t){
+  const c = checks[t.id] || {};
+  const dis = (!db || !clinic() || readOnly) ? "disabled" : "";
+  return `<li class="row" data-id="${t.id}">
+    <input type="checkbox" class="chk" id="chk-${t.id}" aria-label="Done: ${esc(t.title)}" ${dis}>
+    <div>
+      <label class="t" for="chk-${t.id}">${esc(t.title)}</label>
+      ${t.detail ? `<div class="d">${esc(t.detail)}</div>` : ""}
+      <div class="meta"><span class="chip tchip">${tLabel(t.off)}</span><span class="chip dchip"></span>${t.custom ? `<span class="chip custom">Added</span>` : ""}</div>
+    </div>
+    <div class="own"><span class="lbl-m">Owner</span><input type="text" id="own-${t.id}" placeholder="Owner" list="ownersList" ${dis}></div>
+    <div class="due"><span class="lbl-m">Due</span><input type="date" id="due-${t.id}" aria-label="Due date" ${dis}></div>
+    <div class="acts">
+      <button type="button" class="ic" data-act="note" aria-pressed="false" ${dis}>Note</button>
+      <button type="button" class="ic" data-act="na" aria-pressed="false" title="Not applicable at this site" ${dis}>N/A</button>
+      ${t.custom ? `<button type="button" class="ic" data-act="del" ${dis}>Remove</button>` : ""}
+    </div>
+    <div class="notebox" hidden><textarea id="note-${t.id}" placeholder="Notes, vendor contacts, quote numbers…" ${dis}></textarea></div>
+  </li>`;
+}
+
+function buildSections(){
+  const tasks = allTasks();
+  const box = $("#sections");
+  box.innerHTML = SECTIONS.map(s => {
+    const list = tasks.filter(t => t.sec === s.id).sort((a,b) => b.off - a.off);
+    return `<section class="sec" id="sec-${s.id}" data-sec="${s.id}">
+      <div class="sechead">
+        <h2>${esc(s.name)}<span class="who">${esc(s.who)}</span></h2>
+        <span class="frac"></span><div class="meter"><i></i></div>
+      </div>
+      <ul class="rows">${list.map(rowHTML).join("")}</ul>
+      <div class="empty" hidden>Nothing here for this filter.</div>
+      ${db && clinic() && !readOnly ? `<form class="addrow" data-sec="${s.id}">
+        <input type="text" name="title" placeholder="Add a task to ${esc(s.name.toLowerCase())}" aria-label="New task" required>
+        <input type="text" class="off" name="off" inputmode="numeric" placeholder="Days out" aria-label="Days before opening">
+        <button class="btn small" type="submit">Add</button></form>` : ""}
+    </section>`;
+  }).join("") + `<datalist id="ownersList"></datalist>`;
+}
+
+function patch(){
+  const tasks = allTasks();
+  const sig = clinicId + "|" + (db && clinic() && !readOnly) + "|" + tasks.filter(t=>t.custom).map(t=>t.id+t.sec+t.off).join(",");
+  if (sig !== structSig){ structSig = sig; buildSections(); }
+  const act = document.activeElement;
+  const owners = new Set();
+  for (const t of tasks){
+    const c = checks[t.id] || {};
+    if (c.owner && c.owner.trim()) owners.add(c.owner.trim());
+    const row = document.querySelector(`.row[data-id="${CSS.escape(t.id)}"]`); if (!row) continue;
+    const st = statusOf(t);
+    row.classList.toggle("is-done", st === "done");
+    row.classList.toggle("is-na", st === "na");
+    row.hidden = !visible(t);
+    const chk = row.querySelector(".chk"); chk.checked = !!c.done;
+    const own = row.querySelector(`#own-${CSS.escape(t.id)}`); if (own !== act) own.value = c.owner || "";
+    const due = row.querySelector(`#due-${CSS.escape(t.id)}`); if (due !== act) due.value = c.due || "";
+    const d = effDue(t);
+    due.placeholder = d ? fmtISO(d) : "";
+    due.title = c.due ? "Custom due date" : (d ? "Suggested from open date" : "");
+    const note = row.querySelector("textarea"); if (note !== act) note.value = c.note || "";
+    const nb = row.querySelector('[data-act="note"]'); nb.textContent = c.note ? "Note •" : "Note";
+    nb.setAttribute("aria-pressed", String(!row.querySelector(".notebox").hidden));
+    row.querySelector('[data-act="na"]').setAttribute("aria-pressed", String(!!c.na));
+    const dc = row.querySelector(".dchip"); dc.hidden = false;
+    if (st === "done"){ dc.className = "chip dchip ok"; dc.textContent = "Done" + (c.doneAt ? " " + fmtShort(new Date(c.doneAt)) : ""); }
+    else if (st === "na"){ dc.className = "chip dchip"; dc.textContent = "Not applicable"; }
+    else if (d){
+      const diff = Math.round((d - today())/DAY);
+      dc.className = "chip dchip" + (st === "od" ? " od" : st === "soon" ? " soon" : "");
+      dc.textContent = (c.due ? "Due " : "By ") + fmtShort(d) + (diff < 0 ? ` · ${-diff}d late` : diff === 0 ? " · today" : "");
+    } else { dc.className = "chip dchip"; dc.textContent = "Set open date"; dc.hidden = !clinic(); }
+  }
+  // owner lists
+  const ol = [...owners].sort((a,b)=>a.localeCompare(b));
+  $("#ownersList").innerHTML = ol.map(o => `<option value="${esc(o)}">`).join("");
+  const of = $("#ownerFilter");
+  of.innerHTML = `<option value="">Everyone</option>` + ol.map(o => `<option value="${esc(o.toLowerCase())}">${esc(o)}</option>`).join("");
+  of.value = ol.some(o => o.toLowerCase() === ownerF) ? ownerF : (ownerF = "");
+  // section stats + jump
+  let tot=0, dn=0, od=0, soon=0;
+  const jumps = [];
+  for (const s of SECTIONS){
+    const list = tasks.filter(t => t.sec === s.id);
+    const applicable = list.filter(t => statusOf(t) !== "na");
+    const done = applicable.filter(t => statusOf(t) === "done").length;
+    tot += applicable.length; dn += done;
+    od += applicable.filter(t => statusOf(t) === "od").length;
+    soon += applicable.filter(t => statusOf(t) === "soon").length;
+    const el = $("#sec-" + s.id);
+    el.querySelector(".frac").textContent = `${done}/${applicable.length}`;
+    el.querySelector(".meter i").style.width = applicable.length ? (done/applicable.length*100)+"%" : "0";
+    const anyVis = list.some(visible);
+    el.querySelector(".empty").hidden = anyVis;
+    const full = applicable.length && done === applicable.length;
+    jumps.push(`<a href="#sec-${s.id}" class="${full?"full":""}">${esc(s.name.split(/[ ,&]/)[0])} <b>${done}/${applicable.length}</b></a>`);
+  }
+  $("#jump").innerHTML = jumps.join("");
+  // header
+  const cl = clinic();
+  $("#allMeter").style.width = tot ? (dn/tot*100)+"%" : "0";
+  $("#stDone").textContent = `${dn} of ${tot} done`;
+  $("#stOd").textContent = cl && cl.openDate && od ? `${od} overdue` : "";
+  $("#stSoon").textContent = cl && cl.openDate && soon ? `${soon} due this week` : "";
+  const odt = cl && parseD(cl.openDate);
+  if (odt){
+    const n = Math.round((odt - today())/DAY);
+    $("#cdNum").textContent = n > 0 ? n : n === 0 ? "Today" : -n;
+    $("#cdLbl").textContent = n > 0 ? `days until ${cl.name} opens (${fmtShort(odt)})` : n === 0 ? `${cl.name} opens today` : `days since ${cl.name} opened`;
+  } else { $("#cdNum").textContent = "—"; $("#cdLbl").textContent = cl ? "set an open date" : "no clinic selected"; }
+  if ($("#openDate") !== act) $("#openDate").value = cl?.openDate || "";
+  $("#openDate").disabled = !cl || readOnly;
+  $("#delClinic").hidden = !cl || readOnly;
+}
+
+function renderClinics(){
+  const sel = $("#clinicSel");
+  const sorted = [...clinics].sort((a,b) => (a.openDate||"9").localeCompare(b.openDate||"9"));
+  sel.innerHTML = sorted.map(c => `<option value="${esc(c.id)}">${esc(c.name)}${c.openDate ? " — opens " + fmtShort(parseD(c.openDate)) : ""}</option>`).join("");
+  if (clinicId && !clinics.some(c => c.id === clinicId)) clinicId = null;
+  if (!clinicId && sorted.length) clinicId = sorted[0].id;
+  sel.value = clinicId || "";
+  $("#clinicbar").hidden = !clinics.length;
+  const showNew = db && !readOnly && !clinics.length;
+  if (showNew) $("#newClinic").hidden = false;
+  $("#addClinicBtn").hidden = !db || readOnly || !clinics.length;
+}
+
+function subscribeChecks(){
+  if (unsubChecks){ unsubChecks(); unsubChecks = null; }
+  checks = {}; structSig = null;
+  if (!db || !clinicId){ patch(); return; }
+  store.set("clinicId", clinicId);
+  unsubChecks = db.collection(`clinics/${clinicId}/checks`).onSnapshot(snap => {
+    const next = {}; snap.docs.forEach(d => next[d.id] = d.data());
+    checks = next; patch();
+  }, e => showBanner("Live updates stopped. Reload the page to reconnect."));
+}
+
+function showBanner(msg){ const b = $("#banner"); b.textContent = msg; b.hidden = !msg; }
+let saveTimer;
+function saved(ok){
+  const s = $("#saveState");
+  s.textContent = ok ? "Saved" : "Couldn't save that change.";
+  clearTimeout(saveTimer); saveTimer = setTimeout(() => s.textContent = "Changes save automatically for everyone with access.", 2000);
+}
+const queues = {};
+async function writeCheck(id, fields){
+  if (!db || !clinicId || readOnly) return;
+  checks[id] = {...(checks[id]||{}), ...fields}; patch();
+  const ref = db.doc(`clinics/${clinicId}/checks/${id}`);
+  const run = async () => {
+    try { await ref.set({...checks[id], updatedAt: Date.now()}); saved(true); }
+    catch(e){
+      if (e && e.code === "invalid_argument"){ readOnly = true; showBanner("You have view-only access to this checklist."); structSig = null; patch(); }
+      else saved(false);
+    }
+  };
+  queues[id] = (queues[id] || Promise.resolve()).then(run);
+}
+
+// events
+$("#sections").addEventListener("change", e => {
+  const row = e.target.closest(".row"); if (!row) return;
+  const id = row.dataset.id;
+  if (e.target.classList.contains("chk")) writeCheck(id, {done: e.target.checked, doneAt: e.target.checked ? Date.now() : null, na: false});
+  else if (e.target.id === "own-"+id) writeCheck(id, {owner: e.target.value.trim()});
+  else if (e.target.id === "due-"+id) writeCheck(id, {due: e.target.value || null});
+  else if (e.target.tagName === "TEXTAREA") writeCheck(id, {note: e.target.value});
+});
+$("#sections").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const row = b.closest(".row"), id = row.dataset.id, c = checks[id] || {};
+  if (b.dataset.act === "note"){ const nb = row.querySelector(".notebox"); nb.hidden = !nb.hidden; b.setAttribute("aria-pressed", String(!nb.hidden)); if (!nb.hidden) nb.querySelector("textarea").focus(); }
+  if (b.dataset.act === "na") writeCheck(id, {na: !c.na, done: false});
+  if (b.dataset.act === "del"){
+    if (b.dataset.armed){ try { await db.doc(`clinics/${clinicId}/checks/${id}`).delete(); } catch(err){ saved(false); } }
+    else { b.dataset.armed = "1"; b.textContent = "Confirm remove"; b.style.color = "var(--bad)"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent="Remove"; b.style.color=""; } }, 4000); }
+  }
+});
+$("#sections").addEventListener("submit", async e => {
+  const f = e.target.closest("form.addrow"); if (!f) return; e.preventDefault();
+  const title = f.title.value.trim(); if (!title) return;
+  const off = parseInt(f.off.value, 10);
+  const id = "c-" + Math.random().toString(36).slice(2, 10);
+  f.reset();
+  writeCheck(id, {custom:true, title, section:f.dataset.sec, off: isNaN(off) ? 0 : off, done:false});
+});
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  store.set("filter", filter); patch();
+}));
+$("#ownerFilter").addEventListener("change", e => { ownerF = e.target.value; patch(); });
+$("#clinicSel").addEventListener("change", e => { clinicId = e.target.value; subscribeChecks(); });
+$("#openDate").addEventListener("change", async e => {
+  const cl = clinic(); if (!cl || !e.target.value) return;
+  try { await db.doc(`clinics/${cl.id}`).update({openDate: e.target.value}); saved(true); } catch(err){ saved(false); }
+});
+$("#addClinicBtn").addEventListener("click", () => { $("#newClinic").hidden = false; $("#ncCancel").hidden = false; $("#ncName").focus(); });
+$("#ncCancel").addEventListener("click", () => { $("#newClinic").hidden = true; });
+$("#newClinic").addEventListener("submit", async e => {
+  e.preventDefault(); if (!db) return;
+  const name = $("#ncName").value.trim(), openDate = $("#ncDate").value;
+  if (!name || !openDate) return;
+  try {
+    const ref = await db.collection("clinics").add({name, openDate, createdAt: Date.now()});
+    clinicId = ref.id; $("#newClinic").reset(); $("#newClinic").hidden = true; subscribeChecks();
+  } catch(err){
+    if (err && err.code === "invalid_argument"){ readOnly = true; showBanner("You have view-only access to this checklist."); }
+    else showBanner("Couldn't create the clinic. Try again in a moment.");
+  }
+});
+$("#delClinic").addEventListener("click", async () => {
+  const b = $("#delClinic"), cl = clinic(); if (!cl) return;
+  if (!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = `Click again to delete ${cl.name} and all its progress`; setTimeout(()=>{ delete b.dataset.armed; b.textContent = "Delete this clinic's checklist"; }, 5000); return; }
+  delete b.dataset.armed; b.textContent = "Delete this clinic's checklist";
+  try {
+    const snap = await db.collection(`clinics/${cl.id}/checks`).get();
+    for (const d of snap.docs) await db.doc(`clinics/${cl.id}/checks/${d.id}`).delete();
+    await db.doc(`clinics/${cl.id}`).delete();
+    clinicId = null; store.set("clinicId", "");
+  } catch(err){ saved(false); }
+});
+
+// boot
+(function(){
+  const f = store.get("filter"); if (f && ["all","open","od","done"].includes(f)){ filter = f; document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.f === f))); }
+  patch();
+})();
+(async () => {
+  const d = window.claude && await window.claude.use("db").catch(() => null);
+  if (!d){ showBanner("Saving isn't available in this view — you're seeing the template only."); $("#addClinicBtn").hidden = true; return; }
+  db = d;
+  try { const u = await window.claude.use("user"); const w = u && await u.can("data.write"); if (w === false) readOnly = true; } catch(e){}
+  if (readOnly) showBanner("You have view-only access to this checklist.");
+  db.collection("clinics").onSnapshot(snap => {
+    clinics = snap.docs.map(x => ({id:x.id, ...x.data()}));
+    const prev = clinicId; renderClinics();
+    if (prev !== clinicId || !unsubChecks) subscribeChecks(); else patch();
+  }, e => showBanner("Live updates stopped. Reload the page to reconnect."));
+})();
+</script>
